@@ -1,0 +1,10 @@
+{
+  "read_validator": {
+    "max_lines": 400,
+    "suggest_grep_threshold": 200,
+    "suggestions": {
+      "blocked": "Split into smaller reads or use Grep to find specific content first. Consider using grep, rg, sed, or fzf for targeted search.",
+      "warning": "The model hit the allowed threshold. Consider prompt engineering or refining your query."
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "codanna",
+  "owner": {
+    "name": "Test User",
+    "email": "test@example.com"
+  },
+  "profiles": [
+    {
+      "name": "codanna",
+      "source": "profiles/codanna",
+      "description": "A sample Codanna profile",
+      "version": "1.0.0"
+    }
+  ]
+}
