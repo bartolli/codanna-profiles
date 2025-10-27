@@ -2,11 +2,5 @@
   "name": "codanna",
   "version": "1.0.0",
   "provider": "codanna",
-  "files": [
-    "AGENTS.md",
-    "CLAUDE.md",
-    ".gitignore",
-    ".claude/hooks/codanna/hooks-config.json",
-    ".claude/hooks/codanna/pre_tool_use.js"
-  ]
+  "files": []
 }
