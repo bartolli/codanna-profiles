@@ -69,8 +69,22 @@ function determineEnforcement(limit, config) {
   return { level: 'allow', config: null };
 }
 
+// Count lines in a file efficiently
+function getLineCount(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    // Count newlines + 1 (for last line without newline)
+    const lines = content.split('\n').length;
+    return lines;
+  } catch (error) {
+    // If we can't read the file, allow the operation
+    // (the Read tool will handle the actual file access error)
+    return 0;
+  }
+}
+
 // Log validation event to JSONL file
-function logValidation(data, limit, offset, endLine, enforcement) {
+function logValidation(data, limit, offset, endLine, enforcement, isEntireFile = false) {
   try {
     const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
     const logDir = path.join(projectDir, 'logs', 'tools');
@@ -85,6 +99,7 @@ function logValidation(data, limit, offset, endLine, enforcement) {
       limit: limit,
       offset: offset,
       end_line: endLine,
+      is_entire_file: isEntireFile,
       enforcement_level: enforcement.level,
       exit_code: enforcement.config?.exit_code || 0,
       file_path: data.tool_input?.file_path || 'unknown',
@@ -120,14 +135,29 @@ function main() {
         }
 
         const toolInput = data.tool_input || {};
-        const limit = toolInput.limit;
+        let limit = toolInput.limit;
+        const filePath = toolInput.file_path;
+        const offset = toolInput.offset || 1;
+        let isEntireFile = false;
 
-        // If no limit specified, reading entire file - allow
-        if (!limit) {
+        // If no limit specified, check actual file size
+        if (!limit && filePath) {
+          const lineCount = getLineCount(filePath);
+
+          // If we couldn't read the file or it's empty, allow the operation
+          // (the Read tool will handle the actual error)
+          if (lineCount === 0) {
+            process.exit(0);
+          }
+
+          // Set limit to actual file line count for validation
+          limit = lineCount;
+          isEntireFile = true;
+        } else if (!limit) {
+          // No limit and no file path - allow (shouldn't happen)
           process.exit(0);
         }
 
-        const offset = toolInput.offset || 1;
         const endLine = offset + limit - 1;
 
         // Determine enforcement level
@@ -135,27 +165,29 @@ function main() {
 
         // Log warn and block events for analysis
         if (enforcement.level === 'warn' || enforcement.level === 'block') {
-          logValidation(data, limit, offset, endLine, enforcement);
+          logValidation(data, limit, offset, endLine, enforcement, isEntireFile);
         }
 
         // Handle based on enforcement level
         switch (enforcement.level) {
-          case 'block':
+          case 'block': {
+            const readType = isEntireFile ? 'entire file' : 'requested';
             console.error(
-              `Read operation blocked: requested ${limit} lines (${offset}-${endLine}).\n` +
+              `Read operation blocked: ${readType} ${limit} lines (${offset}-${endLine}).\n` +
               `Maximum: ${config.max_read_lines} + tolerance: ${config.tolerance_lines} = ${config.max_read_lines + config.tolerance_lines} lines.\n\n` +
               `${enforcement.config.message}`
             );
             process.exit(enforcement.config.exit_code);
-            break;
+          }
 
-          case 'warn':
+          case 'warn': {
+            const warnReadType = isEntireFile ? 'entire file' : 'read';
             console.error(
-              `[WARN] Large read: ${limit} lines (${offset}-${endLine}).\n` +
+              `[WARN] Large ${warnReadType}: ${limit} lines (${offset}-${endLine}).\n` +
               `${enforcement.config.message}`
             );
             process.exit(enforcement.config.exit_code);
-            break;
+          }
 
           case 'allow':
           default:
