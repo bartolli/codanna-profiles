@@ -1,14 +1,14 @@
 {
   "name": "codanna",
   "owner": {
-    "name": "Test User",
-    "email": "test@example.com"
+    "name": "Angel Bartolli",
+    "email": "3233943+bartolli@users.noreply.github.com"
   },
   "profiles": [
     {
-      "name": "codanna",
-      "source": "profiles/codanna",
-      "description": "A sample Codanna profile",
+      "name": "claude",
+      "source": "profiles/claude",
+      "description": "A sample Codanna profile for claude code interactions.",
       "version": "1.0.0"
     }
   ]
