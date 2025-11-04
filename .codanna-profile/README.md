@@ -26,10 +26,10 @@ cd your-project
 codanna init
 
 # Add the provider
-codanna profile provider add bartolli/codanna-providers
+codanna profile provider add bartolli/codanna-profiles
 
 # Install the profile
-codanna profile install claude@codanna-providers
+codanna profile install claude@codanna-profiles
 
 # Install hook dependencies
 npm --prefix .claude/hooks/codanna install
@@ -47,13 +47,13 @@ codanna add-dir src              # Add directory to settings for indexing
 cd your-project
 codanna init
 
-# Add the provider via URL
-codanna profile provider add https://github.com/bartolli/codanna-providers.git
+# Add the provider via URL (It works with any git provider)
+codanna profile provider add https://github.com/bartolli/codanna-profiles.git
 
 # Install the profile
-codanna profile install claude@codanna-providers
+codanna profile install claude@codanna-profiles
 
-# Install hook dependencies
+# Install hook system
 npm --prefix .claude/hooks/codanna install
 
 # Index your codebase (examples)
@@ -68,8 +68,8 @@ Clone the repository and make modifications according to your project needs (cus
 
 ```bash
 # Clone and customize
-git clone https://github.com/bartolli/codanna-providers.git
-cd codanna-providers
+git clone https://github.com/bartolli/codanna-profiles.git
+cd codanna-profiles
 # Make your modifications...
 
 # Initialize codanna in your project
@@ -77,10 +77,10 @@ cd your-project
 codanna init
 
 # Add the local provider (ID auto-derived from directory name)
-codanna profile provider add /path/to/codanna-providers
+codanna profile provider add /path/to/your-profiles
 
 # Install the profile
-codanna profile install claude@codanna-providers
+codanna profile install claude@your-profiles
 
 # Install hook dependencies
 npm --prefix .claude/hooks/codanna install
