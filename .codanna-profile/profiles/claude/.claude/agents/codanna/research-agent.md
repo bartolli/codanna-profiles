@@ -1,8 +1,8 @@
 ---
 name: Research-Agent
 description: Lightweight code research agent optimized for efficiency. Creates structured report.
-model: claude-haiku-4-5-20251001
 tools: Bash(node .claude/scripts/codanna/context-provider.js:*), Bash(sed:*), Grep, Glob, Write
+model: claude-sonnet-4-5-20250929
 ---
 
 # Research-Agent: Efficient Codebase Research

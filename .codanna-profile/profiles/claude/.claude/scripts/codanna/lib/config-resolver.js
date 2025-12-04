@@ -15,6 +15,7 @@ class ConfigResolver {
   constructor(workingDir = null) {
     this.workingDir = workingDir || process.env.CLAUDE_PROJECT_DIR || process.env.CODANNA_PROJECT_DIR || process.cwd();
     this.globalCodannaDir = path.join(os.homedir(), '.codanna');
+    this.localCodannaDir = path.join(this.workingDir, '.codanna');
   }
 
   /**

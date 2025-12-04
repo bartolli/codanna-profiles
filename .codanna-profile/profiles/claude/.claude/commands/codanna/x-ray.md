@@ -59,6 +59,27 @@ Execute: `node .claude/scripts/codanna/context-provider.js find "$OptimizedQuery
 
 5. **If needed**, repeat <Step_1: GatherContext> with a refined query based on what you learned.
 
+## Graph Visualization
+
+When the symbol has rich relationships, suggest:
+
+> "This symbol has N callers/calls. Would you like a graph visualization?"
+
+If the user explicitly asks for a graph, or accepts the suggestion:
+1. Execute: `node .claude/scripts/codanna/visualize-graph.js <symbol_id:ID> [depth]`
+2. Default depth is 2 (shows immediate + one level of transitive relationships)
+3. The script generates an HTML file and outputs the path
+4. Tell the user the file location so they can open it in their browser
+
+**When to suggest graphs:**
+- Many relationships where text output is hard to follow
+- User asks "how is this connected" or "show me the relationships"
+- User wants to understand call flow or dependency topology
+
+**Do NOT suggest graphs for:**
+- Simple symbols with 0-2 relationships
+- When user is asking about implementation details, not relationships
+
 ---
 
 ## Tips for Efficient Exploration
