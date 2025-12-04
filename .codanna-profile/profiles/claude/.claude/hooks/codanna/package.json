@@ -19,8 +19,8 @@
         "test:all": "npm run test:prompt && npm run test:read-allow && npm run test:read-warn && npm run test:post-tool"
     },
     "dependencies": {
-        "@types/node": "^20.11.0",
-        "tsx": "^4.7.0",
+        "@types/node": "^24.10.1",
+        "tsx": "^4.21.0",
         "typescript": "^5.3.3"
     }
 }

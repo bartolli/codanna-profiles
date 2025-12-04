@@ -132,12 +132,24 @@ async function main() {
   }
 
   try {
+    // Save raw input for analysis
+    const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+    const rawLogPath = path.join(projectDir, 'logs', 'stats', 'subagent-raw-input.json');
+    fs.mkdirSync(path.dirname(rawLogPath), { recursive: true });
+    fs.writeFileSync(rawLogPath, input, 'utf8');
+    console.error(`[subagent-stop] Raw input saved to: ${rawLogPath}`);
+
     const data = JSON.parse(input);
-    const transcriptPath = data.transcript_path;
+
+    // Use agent_transcript_path for subagent stats (new Anthropic format)
+    // Falls back to transcript_path for backwards compatibility
+    const transcriptPath = data.agent_transcript_path || data.transcript_path;
+    const agentId = data.agent_id;
 
     // Debug: Log what we received
-    console.error(`[subagent-stop] Received transcript path: ${transcriptPath}`);
-    console.error(`[subagent-stop] Input data:`, JSON.stringify(data, null, 2));
+    console.error(`[subagent-stop] Agent ID: ${agentId}`);
+    console.error(`[subagent-stop] Agent transcript: ${data.agent_transcript_path}`);
+    console.error(`[subagent-stop] Parent transcript: ${data.transcript_path}`);
 
     if (!transcriptPath || !fs.existsSync(transcriptPath)) {
       console.error(`[subagent-stop] Transcript not found: ${transcriptPath}`);
@@ -149,12 +161,12 @@ async function main() {
 
     // Add metadata
     stats.hook_event = 'SubagentStop';
+    stats.agent_id = agentId;
     stats.cwd = data.cwd;
     stats.git_branch = data.gitBranch;
     stats.analyzed_at = new Date().toISOString();
 
-    // Ensure stats directory exists
-    const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+    // Ensure stats directory exists (reuse projectDir from above)
     const statsDir = path.join(projectDir, 'logs', 'stats');
     if (!fs.existsSync(statsDir)) {
       fs.mkdirSync(statsDir, { recursive: true });
