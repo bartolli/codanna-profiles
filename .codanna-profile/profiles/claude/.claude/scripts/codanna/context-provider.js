@@ -24,6 +24,23 @@ class ContextProvider {
   }
 
   /**
+   * Format error response from Envelope
+   */
+  formatError(response) {
+    const lines = [`Error: ${response.message}`];
+    if (response.hint) {
+      lines.push(`Hint: ${response.hint}`);
+    }
+    if (response.error?.context && Array.isArray(response.error.context)) {
+      lines.push('', 'Candidates:');
+      response.error.context.forEach(ctx => {
+        lines.push(`  - ${ctx.kind} @ ${ctx.file_path}:${ctx.line} [symbol_id:${ctx.symbol_id}]`);
+      });
+    }
+    return lines.join('\n');
+  }
+
+  /**
    * Handle symbol lookup command
    */
   async handleSymbol(symbolName, options = {}) {
@@ -66,10 +83,16 @@ class ContextProvider {
       return `No callers found for: ${functionName}`;
     }
 
+    if (response.status === 'error') {
+      return this.formatError(response);
+    }
+
     const lines = [`# Callers of ${functionName}`, ''];
 
-    if (response.items && response.items.length > 0) {
-      response.items.forEach(item => {
+    // Envelope format: data is array of symbolContext
+    const data = response.data;
+    if (data && Array.isArray(data) && data.length > 0) {
+      data.forEach(item => {
         const { symbol, file_path } = item;
         const symbolId = symbol.id ? ` [symbol_id:${symbol.id}]` : '';
         lines.push(`- **${symbol.name}** (${symbol.kind}) @ ${file_path || 'unknown'}${symbolId}`);
@@ -89,10 +112,16 @@ class ContextProvider {
       return `No calls found for: ${functionName}`;
     }
 
+    if (response.status === 'error') {
+      return this.formatError(response);
+    }
+
     const lines = [`# Calls made by ${functionName}`, ''];
 
-    if (response.items && response.items.length > 0) {
-      response.items.forEach(item => {
+    // Envelope format: data is array of symbolContext
+    const data = response.data;
+    if (data && Array.isArray(data) && data.length > 0) {
+      data.forEach(item => {
         const { symbol, file_path } = item;
         const symbolId = symbol.id ? ` [symbol_id:${symbol.id}]` : '';
         lines.push(`- **${symbol.name}** (${symbol.kind}) @ ${file_path || 'unknown'}${symbolId}`);
@@ -116,7 +145,9 @@ class ContextProvider {
 
     const response = this.executor.execute('retrieve search', searchArgs);
 
-    if (response.status === 'not_found' || response.count === 0) {
+    // Envelope format: count in meta, data is array
+    const count = response.meta?.count ?? 0;
+    if (response.status === 'not_found' || count === 0) {
       if (options.lang) {
         return `No results found for: "${query}" in language '${options.lang}'.\nTry without --lang filter or check if the language is indexed.`;
       }
@@ -128,8 +159,9 @@ class ContextProvider {
       lines.push(`*Language filter: ${options.lang}*`, '');
     }
 
-    if (response.items && response.items.length > 0) {
-      response.items.forEach((item, index) => {
+    const data = response.data;
+    if (data && Array.isArray(data) && data.length > 0) {
+      data.forEach((item, index) => {
         const { symbol, file_path } = item;
         lines.push(`${index + 1}. **${symbol.name}** (${symbol.kind}) [${symbol.language_id}]`);
         lines.push(`   ${file_path || 'unknown'}`);

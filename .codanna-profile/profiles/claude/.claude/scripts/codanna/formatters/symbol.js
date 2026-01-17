@@ -11,15 +11,16 @@ class SymbolFormatter {
    */
   static format(response) {
     if (response.status === 'not_found') {
-      return `Symbol not found: ${response.metadata?.query || 'unknown'}`;
+      return `Symbol not found: ${response.meta?.query || 'unknown'}`;
     }
 
     if (response.status === 'error') {
       return `Error: ${response.message || 'Unknown error'}`;
     }
 
-    // Handle both single item and items array
-    const item = response.item || (response.items && response.items[0]);
+    // Envelope format: data is array or single object
+    const data = response.data;
+    const item = Array.isArray(data) ? data[0] : data;
     if (!item) {
       return 'No symbol data available';
     }
@@ -130,10 +131,11 @@ class SymbolFormatter {
    */
   static formatCompact(response) {
     if (response.status !== 'success') {
-      return `${response.status}: ${response.metadata?.query || 'unknown'}`;
+      return `${response.status}: ${response.meta?.query || 'unknown'}`;
     }
 
-    const item = response.item || (response.items && response.items[0]);
+    const data = response.data;
+    const item = Array.isArray(data) ? data[0] : data;
     if (!item) return 'No symbol data';
 
     const { symbol, file_path } = item;

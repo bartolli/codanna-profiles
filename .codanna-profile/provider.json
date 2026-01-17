@@ -9,7 +9,7 @@
       "name": "claude",
       "source": "profiles/claude",
       "description": "A sample Codanna profile for claude code interactions.",
-      "version": "1.0.3"
+      "version": "1.0.4"
     }
   ]
 }

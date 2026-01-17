@@ -41,8 +41,9 @@ class CodannaExecutor {
 
       return JSON.parse(output);
     } catch (error) {
-      // Check if it's a codanna error (exit code 3 = not found)
-      if (error.status === 3 && error.stdout) {
+      // Envelope format exit codes: 0=success, 1=not_found, 2=error
+      // Also support legacy exit code 3 for backwards compatibility
+      if ((error.status === 1 || error.status === 3) && error.stdout) {
         return JSON.parse(error.stdout);
       }
 
